@@ -25,15 +25,11 @@ class Model:
 
     def prop_forward(self, X):
         self.memory = {}
-        A_curr = X
+        A = X
+        self.layers[0].A = A
         for i in range(1, len(self.layers)):
-            A_prev = A_curr
-            A_curr = self.layers[i].compute(A_prev)
-            Z_curr = self.layers[i].Z
-            self.memory["A" + str(i-1)] = A_prev
-            self.memory["Z" + str(i)] = Z_curr
-            
-        return A_curr
+            A = self.layers[i].compute(A)
+        return A
         
     def fit(self, X, Y, learning_rate, iterations):
         self.learning_rate = learning_rate
@@ -59,9 +55,9 @@ class Model:
             if (self.layers[i].dropout > 0):
                 keep_prob = 1 - self.layers[i].dropout
                 dA_curr = dA_curr * self.layers[i].D / keep_prob
-            
-            A_prev = self.memory["A" + str(i-1)]
-            Z_curr = self.memory["Z" + str(i)]
+
+            A_prev = self.layers[i-1].A
+            Z_curr = self.layers[i].Z
             W_curr = self.layers[i].W
             b_curr = self.layers[i].b
             
