@@ -13,19 +13,29 @@ class Input:
     
 class Dense(Layer):
     """Densely-connected layer"""
-    def __init__(self, n_units, activation, weight_multiplier = 0.1):
+    def __init__(self, n_units, activation, weight_multiplier=0.1, dropout=0):
+        assert(weight_multiplier > 0)
+        assert(dropout >= 0)
+        assert(dropout < 1)
         self.weight_multiplier = weight_multiplier
         self.n_units = n_units
         self.activation = activation
+        self.dropout = dropout
+        self.D = None
         
     def init_params(self, inp_size):
         np.random.seed(1)
         self.W = np.random.randn(self.n_units, inp_size) * self.weight_multiplier
         self.b = np.zeros((self.n_units, 1))
         
-    def compute(self, X):
+    def compute(self, X): 
         self.Z = np.dot(self.W, X) + self.b
         self.A = self.activation.forward(self.Z)
+        if self.dropout > 0:
+            D = np.random.rand(self.A.shape[0], self.A.shape[1])
+            keep_prob = 1 - self.dropout
+            self.D = (D < keep_prob).astype(int)
+            self.A = self.A * self.D / keep_prob
         return self.A
     
     def __str__(self):

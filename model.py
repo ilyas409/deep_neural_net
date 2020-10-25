@@ -59,12 +59,15 @@ class Model:
         Y = Y.reshape(AL.shape)
         
         grads_values = {}
+        epsilon = 1e-8
         
-        dA_prev = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+        dA_prev = - (np.divide(Y, AL + epsilon) - np.divide(1 - Y, 1 - AL + epsilon))
         
         for i in reversed(range(1, len(self.layers))):
-            
             dA_curr = dA_prev
+            if (self.layers[i].dropout > 0):
+                keep_prob = 1 - self.layers[i].dropout
+                dA_curr = dA_curr * self.layers[i].D / keep_prob
             
             A_prev = self.memory["A" + str(i-1)]
             Z_curr = self.memory["Z" + str(i)]
