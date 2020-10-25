@@ -28,8 +28,8 @@ test_x = test_x_flatten/255.
 ```python3
 model = Model([
     Input(len(train_x)),
-    Dense(64, activation=Activation(Activations.ReLU), weight_multiplier=0.1),
-    Dense(16, activation=Activation(Activations.ReLU), weight_multiplier=0.1),
+    Dense(64, activation=Activation(Activations.ReLU), weight_multiplier=0.1, dropout=0.15),
+    Dense(16, activation=Activation(Activations.ReLU), weight_multiplier=0.1, dropout=0.2),
     Dense(5, activation=Activation(Activations.ReLU), weight_multiplier=0.1),
     Dense(1, activation=Activation(Activations.Sigmoid), weight_multiplier=1)
 ])
