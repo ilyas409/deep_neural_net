@@ -44,31 +44,34 @@ class Model:
                 print("cost after iteration",i,":",cost)
         return costs
     
-    def update_parameters(self, W, b, dW, db):
+    def update_parameters(self, i, dW, db):
         if not self.use_adam_optimizer:
-            return W - self.learning_rate * dW, b - self.learning_rate * db
-        
+            self.layers[i].W -= self.learning_rate * dW
+            self.layers[i].b -= self.learning_rate * db
+            return
+        beta1 = 0.9
+        beta2 = 0.999
+        epsilon = 1e-8
+    
         # Moving average of the gradients. Inputs: "v, grads, beta1". Output: "v".
-        vdW = beta1 * vdW + (1 - beta1) * dW
-        vdb = beta1 * vdb + (1 - beta1) * db
+        self.layers[i].vdW = beta1 * self.layers[i].vdW + (1 - beta1) * dW
+        self.layers[i].vdb = beta1 * self.layers[i].vdb + (1 - beta1) * db
 
         # Compute bias-corrected first moment estimate. Inputs: "v, beta1, t". Output: "v_corrected".
-        v_corrected_dW = vdW / (1 - beta1)
-        v_corrected_db = vdb / (1 - beta1)
+        v_corrected_dW = self.layers[i].vdW / (1 - beta1)
+        v_corrected_db = self.layers[i].vdb / (1 - beta1)
 
         # Moving average of the squared gradients. Inputs: "s, grads, beta2". Output: "s".
-        sdW = beta2 * sdW + (1 - beta2) * np.power(dW, 2)
-        sdb = beta2 * sdb + (1 - beta2) * np.power(db, 2)
+        self.layers[i].sdW = beta2 * self.layers[i].sdW + (1 - beta2) * np.power(dW, 2)
+        self.layers[i].sdb = beta2 * self.layers[i].sdb + (1 - beta2) * np.power(db, 2)
 
         # Compute bias-corrected second raw moment estimate. Inputs: "s, beta2, t". Output: "s_corrected".
-        s_corrected_dW = sdW / (1 - beta2)
-        s_corrected_db = sdb / (1 - beta2)
+        s_corrected_dW = self.layers[i].sdW / (1 - beta2)
+        s_corrected_db = self.layers[i].sdb / (1 - beta2)
 
         # Update parameters. Inputs: "parameters, learning_rate, v_corrected, s_corrected, epsilon". Output: "parameters".
-        W = W - learning_rate * v_corrected_dW / (np.sqrt(s_corrected_dW + epsilon)
-        b = b - learning_rate * v_corrected_db / (np.sqrt(s_corrected_db + epsilon)
-        
-        return W, b
+        self.layers[i].W = self.layers[i].W - self.learning_rate * v_corrected_dW / (np.sqrt(s_corrected_dW) + epsilon)
+        self.layers[i].b = self.layers[i].b - self.learning_rate * v_corrected_db / (np.sqrt(s_corrected_db) + epsilon)
     
     def propagate_backward(self, AL, Y):
         m = AL.shape[1]
@@ -93,7 +96,4 @@ class Model:
             db_curr = 1/m * np.sum(dZ_curr, axis=1, keepdims=True)
             dA_prev = np.dot(W_curr.T, dZ_curr)
             
-            self.layers[i].W, self.layers[i] = self.update_parameters(self.layers[i].W,
-                                                                      self.layers[i].b,
-                                                                      dW_curr,
-                                                                      db_curr)
+            self.update_parameters(i, dW_curr, db_curr)

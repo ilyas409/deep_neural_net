@@ -28,6 +28,11 @@ class Dense(Layer):
         self.W = np.random.randn(self.n_units, inp_size) * self.weight_multiplier
         self.b = np.zeros((self.n_units, 1))
         
+        self.vdW = np.zeros(shape=self.W.shape)
+        self.vdb = np.zeros(shape=self.b.shape)
+        self.sdW = np.zeros(shape=self.W.shape)
+        self.sdb = np.zeros(shape=self.b.shape)
+        
     def compute(self, X): 
         self.Z = np.dot(self.W, X) + self.b
         self.A = self.activation.forward(self.Z)
