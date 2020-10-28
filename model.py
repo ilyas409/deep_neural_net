@@ -1,9 +1,11 @@
 import numpy as np
+from loss import BinaryCrossEntropy
 
 class Model:
     """Sequential binary classifier. Supports any number of `Dense` layers"""
     def __init__(self, layers):
         self.layers = layers
+        self.loss_fn = BinaryCrossEntropy()
         inp_size = self.layers[0].input_size
         # Generate weights and biases:
         for i in range(1, len(self.layers)):
@@ -11,11 +13,8 @@ class Model:
             inp_size = self.layers[i].n_units
     
     def compute_cost(self, AL, Y):
-        m = AL.shape[1]
-        epsilon = 1e-8
-        AL_clipped = np.clip(AL, epsilon, 1 - epsilon)
-        cost = - 1/m * np.sum(Y * np.log(AL_clipped) + (1 - Y) * np.log(1 - AL_clipped), axis=0)
-        return np.squeeze(cost)
+        """Compute cost using the loss function"""
+        return self.loss_fn.forward(AL, Y)
     
     def evaluate(self, X, Y):
         Y_hat = self.predict(X)
@@ -46,28 +45,32 @@ class Model:
         return costs
     
     def propagate_backward(self, AL, Y):
+        """Clean backpropagation with extracted loss computation"""
         m = AL.shape[1]
         Y = Y.reshape(AL.shape)
         
-        epsilon = 1e-8
-        AL_clipped = np.clip(AL, epsilon, 1 - epsilon)
-        dA_prev = - (np.divide(Y, AL_clipped) - np.divide(1 - Y, 1 - AL_clipped))
+        # Use loss function to compute initial gradient
+        dA_prev = self.loss_fn.backward(AL, Y)
         
         for i in reversed(range(1, len(self.layers))):
             dA_curr = dA_prev
+            
+            # Apply dropout gradient scaling if needed
             if (self.layers[i].dropout > 0):
                 keep_prob = 1 - self.layers[i].dropout
                 dA_curr = dA_curr * self.layers[i].D / keep_prob
 
+            # Get layer parameters
             A_prev = self.layers[i-1].A
             Z_curr = self.layers[i].Z
             W_curr = self.layers[i].W
-            b_curr = self.layers[i].b
             
+            # Compute gradients
             dZ_curr = self.layers[i].activation.backward(dA_curr, Z_curr)
             dW_curr = 1/m * np.dot(dZ_curr, A_prev.T)
             db_curr = 1/m * np.sum(dZ_curr, axis=1, keepdims=True)
             dA_prev = np.dot(W_curr.T, dZ_curr)
             
+            # Update parameters
             self.layers[i].W -= self.learning_rate * dW_curr
             self.layers[i].b -= self.learning_rate * db_curr
