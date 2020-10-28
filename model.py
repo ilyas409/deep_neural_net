@@ -12,7 +12,9 @@ class Model:
     
     def compute_cost(self, AL, Y):
         m = AL.shape[1]
-        cost = - 1/m * np.sum(Y * np.log(AL) + (1 - Y) * np.log(1 - AL), axis=1)
+        epsilon = 1e-8
+        AL_clipped = np.clip(AL, epsilon, 1 - epsilon)
+        cost = - 1/m * np.sum(Y * np.log(AL_clipped) + (1 - Y) * np.log(1 - AL_clipped), axis=0)
         return np.squeeze(cost)
     
     def evaluate(self, X, Y):
@@ -48,7 +50,8 @@ class Model:
         Y = Y.reshape(AL.shape)
         
         epsilon = 1e-8
-        dA_prev = - (np.divide(Y, AL + epsilon) - np.divide(1 - Y, 1 - AL + epsilon))
+        AL_clipped = np.clip(AL, epsilon, 1 - epsilon)
+        dA_prev = - (np.divide(Y, AL_clipped) - np.divide(1 - Y, 1 - AL_clipped))
         
         for i in reversed(range(1, len(self.layers))):
             dA_curr = dA_prev

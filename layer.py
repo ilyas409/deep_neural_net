@@ -24,7 +24,6 @@ class Dense(Layer):
         self.D = None
         
     def init_params(self, inp_size):
-        np.random.seed(1)
         self.W = np.random.randn(self.n_units, inp_size) * self.weight_multiplier
         self.b = np.zeros((self.n_units, 1))
         
@@ -40,3 +39,4 @@ class Dense(Layer):
     
     def __str__(self):
         return "Number of units:" + str(self.n_units) + ", " + str(self.activation)
+    
