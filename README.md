@@ -1,6 +1,17 @@
-# deep_neural_net
-Multilayer neural network
+# deeplearn-scratch
 
+A toy implementation of a multilayer neural network library, built for learning purposes and inspired by Keras. I was motivated to build this after taking Andrew Ng's Deep Learning Specialization on Coursera (https://www.coursera.org/specializations/deep-learning). While the course is taught in TensorFlow 1, it also introduces students to building neural networks from scratch in NumPy, which inspired me to attempt my own toy NumPy implementation with a Keras-like API.
+This project implements a simple sequential model with dense layers, various activation functions, dropout regularization, and backpropagation from scratch using NumPy.
+## Features
+
+- **Sequential Model Architecture**: Build networks layer by layer
+- **Dense (Fully Connected) Layers**: Standard neural network building blocks
+- **Activation Functions**: ReLU and Sigmoid with proper gradient computation
+- **Dropout Regularization**: Prevent overfitting during training
+- **Binary Classification**: Optimized for binary cross-entropy loss
+- **Numerical Stability**: Proper clipping and epsilon handling
+
+This is a educational implementation designed to understand the fundamentals of neural networks without relying on high-level frameworks.
 
 ## Example Usage
 
@@ -44,3 +55,14 @@ c = model.fit(train_x, train_y, learning_rate=0.0075, iterations=2500)
 ```python3
 print(model.evaluate(train_x, train_y), model.evaluate(test_x, test_y))
 ```
+
+## Learning Goals
+
+This implementation helped me understand:
+- Forward and backward propagation mechanics
+- Gradient computation and chain rule application
+- Weight initialization strategies
+- Regularization techniques (dropout)
+- Numerical stability considerations in deep learning
+
+*Inspired by the Keras API design but implemented from scratch for educational purposes.*
